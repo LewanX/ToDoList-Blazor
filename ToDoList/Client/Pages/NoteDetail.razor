@@ -1,0 +1,91 @@
+﻿@using Microsoft.AspNetCore.Components.Web;
+@inject HttpClient http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@using CurrieTechnologies.Razor.SweetAlert2;
+@inject SweetAlertService Swal;
+
+
+@if (Notes != null)
+{
+    
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h3">@Notes.Title</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.h4">@Notes.Description</MudText>
+                <MudText>@Notes.CreatedAt.ToString("MM/dd/yyyy")</MudText>
+                <MudText>@Notes.UpdatedAt.ToString("MM/dd/yyyy")</MudText>
+                <MudText Typo="Typo.h4">@Notes.Status</MudText>
+           
+
+            </MudCardContent>
+            <MudCardActions>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="DeleteNote" Color="Color.Default" />
+            <MudCheckBox @bind-Checked="@Size_CheckBox3" Size="Size.Large" Color="Color.Tertiary"></MudCheckBox>
+            </MudCardActions>
+        </MudCard>
+   
+
+    
+
+    
+}
+
+@code {
+    @using ToDoList.Shared
+    [Parameter]
+    public Note? Notes { get; set; }
+    [Parameter]
+    public EventCallback OnNoteDeleted { get; set; }
+
+    private DateTime updatedTime;
+    private bool isEditing = false;
+
+    protected override void OnInitialized()
+    {
+        // Inicializa updatedTime con la última fecha de actualización
+        updatedTime = Notes.UpdatedAt;
+        base.OnInitialized();
+    }
+
+    private async Task DeleteNote()
+    {
+        
+
+
+        var resultado = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Eliminar Tarea",
+                Text = "¿Deseas eliminar esta tarea?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        if (resultado.IsConfirmed)
+        {
+            // Lógica para eliminar la nota
+            await http.DeleteAsync($"api/note/Delete/{Notes.Id}");
+            await OnNoteDeleted.InvokeAsync();
+        }
+    }
+
+    private async Task ToggleEditMode()
+    {
+        updatedTime = DateTime.UtcNow;
+        isEditing = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        // Lógica para guardar los cambios en la nota
+
+        updatedTime = DateTime.UtcNow;
+        isEditing = false;
+    }
+    public bool Size_CheckBox3 { get; set; } = false;
+}

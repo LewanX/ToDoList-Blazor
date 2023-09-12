@@ -1,0 +1,64 @@
+﻿@using ToDoList.Shared
+@inject HttpClient http
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="@note">
+            
+        <MudTextField  Label="Title" @bind-Value="@note.Title"></MudTextField>
+         <MudTextField @bind-Value="@note.Description" Label="Description"></MudTextField>
+            
+        </EditForm>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Create">Ok</MudButton>
+    </DialogActions>
+
+</MudDialog>
+
+
+
+
+
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    public Note note { get; set; } = new Note();
+
+    private async void Create()
+    {
+        try
+        {
+            Console.WriteLine(note.Title);
+            Note? NewNote = new Note();
+            NewNote = note;
+            NewNote.CreatedAt = DateTime.Now;
+            NewNote.UpdatedAt = DateTime.Now;
+            NewNote.Status = Status.Pending;
+
+
+            await http.PostAsJsonAsync("api/note/Create", NewNote);
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+        }
+
+        await RefreshNotes();
+        StateHasChanged();
+    
+    
+    }
+    private async Task RefreshNotes()
+    {
+        await http.GetFromJsonAsync<List<Note>>("api/note");
+    }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(note.Title));
+    void Cancel() => MudDialog.Cancel();
+}

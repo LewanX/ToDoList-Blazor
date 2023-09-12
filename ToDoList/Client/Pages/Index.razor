@@ -1,0 +1,139 @@
+﻿@page "/"
+@using CurrieTechnologies.Razor.SweetAlert2;
+@using ToDoList.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject IDialogService DialogService
+@inject HttpClient http
+@inject SweetAlertService Swal;
+@attribute [Authorize]
+
+
+<PageTitle>Index</PageTitle>
+
+
+
+<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+    Open Dialog
+</MudButton>
+
+<EditForm Model="@NotesModel" OnValidSubmit="@HndleOnValidSubmit" class="container">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="d-flex">
+        <div class="form-group flex-grow-1 mr-2">
+            
+            <InputText id="title" @bind-Value="@NotesModel.Title" class="form-control" placeholder="Title" />
+
+        </div>
+
+        <div class="form-group flex-grow-1 mr-2">
+            
+            <InputTextArea id="description" @bind-Value="@NotesModel.Description" class="form-control" placeholder="Description" />
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+
+
+
+
+
+
+
+
+
+<div class="container">
+    <h2>Tareas</h2>
+    @if (notes != null)
+    {
+       
+                <MudGrid >
+            @foreach (var note in notes)
+            {
+                    <MudItem xs="3">
+                        
+                        <NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" />
+                        
+                    </MudItem>
+            }
+                </MudGrid>
+
+                @*<NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" />*@
+            
+        
+    }
+    else
+    {
+        
+       
+    }
+</div>
+
+@if(notes== null)
+{
+    <MudAlert Severity="Severity.Info">You dont have Notes yet</MudAlert>
+    <SurveyPrompt Title="How is Blazor working for you?" />
+}
+
+
+@code{
+    List<Note> ?notes;
+    public Note NotesModel=new Note();
+ 
+
+    protected override async Task OnInitializedAsync()
+    {
+        notes = await http.GetFromJsonAsync<List<Note>>("api/note");
+
+    }
+    private async Task RefreshNotes()
+    {
+        notes = await http.GetFromJsonAsync<List<Note>>("api/note");
+    }
+
+    private async void HandleNoteDeleted()
+    {
+        await RefreshNotes(); // Actualiza la lista de notas inmediatamente después de eliminar
+        StateHasChanged();   // Notifica a Blazor para que vuelva a representar la página
+    }
+    private async void HndleOnValidSubmit()
+    {
+        try
+        {
+            Note? NewNote = new Note();
+            NewNote = NotesModel;
+            NewNote.CreatedAt = DateTime.Now;
+            NewNote.UpdatedAt = DateTime.Now;
+            NewNote.Status=Status.Pending;
+
+
+            await http.PostAsJsonAsync("api/note/Create", NewNote);
+
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+        }
+
+        await RefreshNotes();
+        StateHasChanged();
+    }
+    private  void OpenDialog()
+    {
+        
+            DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true };
+
+            DialogService.Show<CreateNote>("Simple Dialog", closeOnEscapeKey);
+
+        StateHasChanged();
+            }
+}
