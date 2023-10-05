@@ -87,5 +87,40 @@ namespace ToDoList.Server.Controllers
             return Ok();
           
         }
+
+        [HttpPut]
+        [Route("Edit/{id}")]
+        public async Task<ActionResult<Note>> EditNote(int id, Note updatedNote)
+        {
+            var user = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var noteToEdit = user.Notes.FirstOrDefault(n => n.Id == id);
+
+            if (noteToEdit == null)
+            {
+                return NotFound("Note not found");
+            }
+            if (noteToEdit.Status == Status.Complete)
+            {
+                noteToEdit.Status = Status.Pending;
+            }
+            else
+            {
+                noteToEdit.Status = Status.Complete;
+            }
+
+            context.Update(noteToEdit);
+            // Guarda los cambios en la base de datos
+            await context.SaveChangesAsync();
+
+            return Ok(noteToEdit);
+        }
+
+
     }
 }

@@ -9,8 +9,8 @@
 
 @if (Notes != null)
 {
-    
-        <MudCard>
+
+        <MudCard Elevation="2" Class="rounded-lg" Style="z-index:-2"  @onclick="ToggleDrawer" >
             <MudCardHeader>
                 <CardHeaderContent>
                     <MudText Typo="Typo.h3">@Notes.Title</MudText>
@@ -18,17 +18,41 @@
             </MudCardHeader>
             <MudCardContent>
                 <MudText Typo="Typo.h4">@Notes.Description</MudText>
-                <MudText>@Notes.CreatedAt.ToString("MM/dd/yyyy")</MudText>
-                <MudText>@Notes.UpdatedAt.ToString("MM/dd/yyyy")</MudText>
-                <MudText Typo="Typo.h4">@Notes.Status</MudText>
-           
+               
+             
 
             </MudCardContent>
             <MudCardActions>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="DeleteNote" Color="Color.Default" />
-            <MudCheckBox @bind-Checked="@Size_CheckBox3" Size="Size.Large" Color="Color.Tertiary"></MudCheckBox>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="DeleteNote" Color="Color.Secondary" Size="Size.Large" />
+                <input type="checkbox" @onchange="Complete" @onclick:stopPropagation />
+           
             </MudCardActions>
+
+           
+
+
+
+
         </MudCard>
+
+        <MudDrawer Breakpoint="Breakpoint.Lg" @bind-Open="@open" Anchor="Anchor.End"   DisableOverlay Elevation="3" Width="340px" Height="100%"  Variant="@DrawerVariant.Temporary" Style="z-index:0">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h6">List</MudText>
+            </MudDrawerHeader>
+            <MudNavMenu>
+                <MudPaper Elevation="1"  Class="m-3 p-2">
+                    <MudText Typo="Typo.h4">
+                        @Notes.Title
+                    </MudText>
+                </MudPaper>
+      @*  <MudText Typo="Typo.h4">@Notes.Status</MudText>
+        <MudText>Created: @Notes.CreatedAt.ToString("MM/dd/yyyy")</MudText>
+        <MudText>Last Updated: @Notes.UpdatedAt.ToString("MM/dd/yyyy")</MudText>*@
+            </MudNavMenu>
+        </MudDrawer>
+
+  
+   
    
 
     
@@ -42,10 +66,29 @@
     public Note? Notes { get; set; }
     [Parameter]
     public EventCallback OnNoteDeleted { get; set; }
+    [Parameter]
+    public EventCallback OnNoteEdited { get; set; }
+    bool open;
+  
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+    private async Task Click()
+    {
+        Console.WriteLine("a");
+    }
 
     private DateTime updatedTime;
     private bool isEditing = false;
 
+    private async Task Complete(ChangeEventArgs arg)
+    {
+        updatedTime = DateTime.UtcNow;
+        await http.PutAsJsonAsync($"api/note/Edit/{Notes.Id}",Notes);
+        await OnNoteEdited.InvokeAsync();
+
+    }
     protected override void OnInitialized()
     {
         // Inicializa updatedTime con la última fecha de actualización

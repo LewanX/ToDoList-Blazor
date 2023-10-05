@@ -1,11 +1,14 @@
 ﻿@using ToDoList.Shared
 @inject HttpClient http
-<MudDialog>
+@using Services
+@inject MyDataService DataService
+
+<MudDialog OnClosed="HandleModalClosed" >
     <DialogContent>
         <EditForm Model="@note">
             
         <MudTextField  Label="Title" @bind-Value="@note.Title"></MudTextField>
-         <MudTextField @bind-Value="@note.Description" Label="Description"></MudTextField>
+            <MudTextField @bind-Value="@note.Description" Lines="5" Label="Description"></MudTextField>
             
         </EditForm>
 
@@ -26,6 +29,7 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     public Note note { get; set; } = new Note();
+    [Parameter] public EventCallback<bool> OnNoteCreated { get; set; }
 
     private async void Create()
     {
@@ -40,17 +44,21 @@
 
 
             await http.PostAsJsonAsync("api/note/Create", NewNote);
+            MudDialog.Close();
+            DataService.NotifyNoteCreated(true);
 
-            MudDialog.Close(DialogResult.Ok(true));
+
+
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
 
         }
+     
+       
 
-        await RefreshNotes();
-        StateHasChanged();
+       
     
     
     }

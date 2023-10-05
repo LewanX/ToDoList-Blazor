@@ -17,12 +17,11 @@ namespace ToDoList.Server.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<ApplicationUser>().Navigation(e => e.SuperHeroes).AutoInclude();
             builder.Entity<ApplicationUser>().Navigation(e => e.Notes).AutoInclude();
 
            
         }
-        public DbSet<Superhero> SuperHeroes => Set<Superhero>();
+       
         public DbSet<Note> Notes => Set<Note>();
         public DbSet<Tags> Tags => Set<Tags>();
        

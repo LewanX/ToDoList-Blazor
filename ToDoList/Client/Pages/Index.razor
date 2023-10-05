@@ -1,44 +1,19 @@
 ﻿@page "/"
 @using CurrieTechnologies.Razor.SweetAlert2;
 @using ToDoList.Shared
+@using Services
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject IDialogService DialogService
 @inject HttpClient http
 @inject SweetAlertService Swal;
 @attribute [Authorize]
-
+@inject MyDataService DataService
 
 <PageTitle>Index</PageTitle>
 
 
 
-<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
-    Open Dialog
-</MudButton>
-
-<EditForm Model="@NotesModel" OnValidSubmit="@HndleOnValidSubmit" class="container">
-
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div class="d-flex">
-        <div class="form-group flex-grow-1 mr-2">
-            
-            <InputText id="title" @bind-Value="@NotesModel.Title" class="form-control" placeholder="Title" />
-
-        </div>
-
-        <div class="form-group flex-grow-1 mr-2">
-            
-            <InputTextArea id="description" @bind-Value="@NotesModel.Description" class="form-control" placeholder="Description" />
-        </div>
-
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-    </div>
-</EditForm>
 
 
 
@@ -48,19 +23,26 @@
 
 
 
+
+
+<MudGrid Style="padding:1">
+    <MudItem xs="12" Style="display:flex;justify-content:center">
+        <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" @onclick="OpenDialog" Size="Size.Large" />
+    </MudItem>  
+</MudGrid>
 
 <div class="container">
-    <h2>Tareas</h2>
+    
+    
     @if (notes != null)
     {
-       
                 <MudGrid >
             @foreach (var note in notes)
             {
-                    <MudItem xs="3">
-                        
-                        <NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" />
-                        
+                    <MudItem xs="12">
+                       
+                        <NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" OnNoteEdited="HandleNoteEdited" />
+                   
                     </MudItem>
             }
                 </MudGrid>
@@ -86,11 +68,30 @@
 @code{
     List<Note> ?notes;
     public Note NotesModel=new Note();
- 
-
+    
+    private async void HandleNoteEdited()
+    {
+        await RefreshNotes(); // Actualiza la lista de notas inmediatamente después de editar
+        StateHasChanged();   // Notifica a Blazor para que vuelva a representar la página
+    }
+    private async void HandleNoteDeleted()
+    {
+        await RefreshNotes(); // Actualiza la lista de notas inmediatamente después de eliminar
+        StateHasChanged();   // Notifica a Blazor para que vuelva a representar la página
+    }
+    private async void HandleNoteCreated(bool created)
+    {
+        if (created)
+        {
+            // Actualiza la lista de notas después de crear una nueva nota
+            await RefreshNotes();
+            StateHasChanged();
+        }
+    }
     protected override async Task OnInitializedAsync()
     {
         notes = await http.GetFromJsonAsync<List<Note>>("api/note");
+        DataService.NoteCreated += HandleNoteCreated;
 
     }
     private async Task RefreshNotes()
@@ -98,42 +99,24 @@
         notes = await http.GetFromJsonAsync<List<Note>>("api/note");
     }
 
-    private async void HandleNoteDeleted()
-    {
-        await RefreshNotes(); // Actualiza la lista de notas inmediatamente después de eliminar
-        StateHasChanged();   // Notifica a Blazor para que vuelva a representar la página
-    }
-    private async void HndleOnValidSubmit()
-    {
-        try
-        {
-            Note? NewNote = new Note();
-            NewNote = NotesModel;
-            NewNote.CreatedAt = DateTime.Now;
-            NewNote.UpdatedAt = DateTime.Now;
-            NewNote.Status=Status.Pending;
-
-
-            await http.PostAsJsonAsync("api/note/Create", NewNote);
-
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-
-        }
-
-        await RefreshNotes();
-        StateHasChanged();
-    }
     private  void OpenDialog()
     {
-        
-            DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true };
 
-            DialogService.Show<CreateNote>("Simple Dialog", closeOnEscapeKey);
+        DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true };
 
-        StateHasChanged();
-            }
+        var dialog=DialogService.Show<CreateNote>("New Note", closeOnEscapeKey);
+        var result = dialog.Result;
+        if (!result.IsCanceled)
+        {        
+            StateHasChanged();
+
+
+
+        }
+
+
+    }
+
+   
+
 }
