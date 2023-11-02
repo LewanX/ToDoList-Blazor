@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToDoList.Server.Data;
 
@@ -11,9 +12,11 @@ using ToDoList.Server.Data;
 namespace ToDoList.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231025190112_moreRelationships")]
+    partial class moreRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -413,7 +416,7 @@ namespace ToDoList.Server.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("NoteId")
+                    b.Property<int?>("NoteId")
                         .HasColumnType("int");
 
                     b.Property<bool>("Status")
@@ -512,13 +515,9 @@ namespace ToDoList.Server.Data.Migrations
 
             modelBuilder.Entity("ToDoList.Shared.SubNotes", b =>
                 {
-                    b.HasOne("ToDoList.Shared.Note", "Note")
+                    b.HasOne("ToDoList.Shared.Note", null)
                         .WithMany("subNotes")
-                        .HasForeignKey("NoteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Note");
+                        .HasForeignKey("NoteId");
                 });
 
             modelBuilder.Entity("ToDoList.Shared.Tags", b =>

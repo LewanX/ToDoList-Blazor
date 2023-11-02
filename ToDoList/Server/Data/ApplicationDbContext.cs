@@ -19,10 +19,11 @@ namespace ToDoList.Server.Data
             base.OnModelCreating(builder);
             builder.Entity<ApplicationUser>().Navigation(e => e.Notes).AutoInclude();
 
-           
+     
         }
-       
+
         public DbSet<Note> Notes => Set<Note>();
+        public DbSet<SubNotes> SubNotes => Set<SubNotes>();
         public DbSet<Tags> Tags => Set<Tags>();
        
     }

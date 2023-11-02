@@ -10,45 +10,173 @@
 @if (Notes != null)
 {
 
-        <MudCard Elevation="2" Class="rounded-lg" Style="z-index:-2"  @onclick="ToggleDrawer" >
+        <MudCard Elevation="2" Class="rounded-lg "  Style="z-index:-2;height:100%"  @onclick="ToggleDrawer"  >
             <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h3">@Notes.Title</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudText Typo="Typo.h4">@Notes.Description</MudText>
+                <CardHeaderContent >
+                <MudGrid Style="display:flex;justify-content:center;align-items:center;text-align:center">
+                    <MudItem xs="1">
+                        <MudGrid>
+                            <MudItem xs="12" Style="position:relative;bottom:100%">
+                                @*<MudToggleIconButton Toggled="@false" ToggledChanged="Complete" Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="@Color.Default" ToggledIcon="@Icons.Material.Filled.CheckCircle" ToggledColor="@Color.Success" Title="Done" @onclick:stopPropagation />
+                            *@          @if (Notes.Status == Status.Complete)
+                                {
+                                    <MudToggleIconButton ToggledChanged="Pending" Icon="@Icons.Material.Filled.CheckCircle" Color="@Color.Success" Title="Done" @onclick:stopPropagation />
+                                }
+                                else
+                                {
+                                    <MudToggleIconButton ToggledChanged="Complete" Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="@Color.Default" Title="Done" @onclick:stopPropagation />
+                                }
+
+                                @*  @Notes.Status*@
+                            </MudItem>
+                            <MudItem xs="12">
+                                @Notes.subNotes.Count(s=> s.Status==true)
+                                of   @Notes.subNotes.Count()
+                            </MudItem>
+                        </MudGrid>
+                        
+
+                    
+                    </MudItem>
+                    <MudItem xs="10">
+                         <MudTextField T="string" @bind-Value="@TitleNote" Style="font-weight:bold;font-size:25px" Label="Note" Variant="Variant.Text" TextChanged="OnEdit" Text="@Notes.Title" Adornment="Adornment.End" @onclick:stopPropagation />
+                    </MudItem>
+                    <MudItem xs="1">
+                        @if(Notes.Favorite == false)
+                        {
+   
+                            <MudToggleIconButton ToggledChanged="TurnFav" Icon="@Icons.Material.Filled.Favorite" Color="@Color.Default"  Title="Favorite" @onclick:stopPropagation />
+                        }
+                        else
+                        {
+                           
+                            <MudToggleIconButton ToggledChanged="NoFav" Icon="@Icons.Material.Filled.Favorite" Color="@Color.Secondary" Title="Favorite" @onclick:stopPropagation />
+
+                        }
+
+                    </MudItem>
+                    
+                  
+                </MudGrid>
                
-             
-
-            </MudCardContent>
-            <MudCardActions>
+                @*   <MudText Typo="Typo.h5">@Notes.Title</MudText>*@
+                </CardHeaderContent>
+          @*  <CardHeaderActions>
+              
+            </CardHeaderActions>*@
+            </MudCardHeader>
+   
+        @*    <MudCardActions>
+              
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="DeleteNote" Color="Color.Secondary" Size="Size.Large" />
-                <input type="checkbox" @onchange="Complete" @onclick:stopPropagation />
-           
+             
+                
             </MudCardActions>
-
-           
-
-
-
-
+*@
         </MudCard>
 
-        <MudDrawer Breakpoint="Breakpoint.Lg" @bind-Open="@open" Anchor="Anchor.End"   DisableOverlay Elevation="3" Width="340px" Height="100%"  Variant="@DrawerVariant.Temporary" Style="z-index:0">
+
+
+
+
+
+        <MudDrawer Breakpoint="Breakpoint.Lg" @bind-Open="@open" Anchor="Anchor.End"   DisableOverlay Elevation="3" Width="330px" Height="100%"  Variant="@DrawerVariant.Temporary" Style="z-index:0">
             <MudDrawerHeader>
                 <MudText Typo="Typo.h6">List</MudText>
+    
+
+               
+                   
+              
+               
+               
+           
+          
+            <MudDivider DividerType="DividerType.Middle" Class="my-6" Style="text-align:center; position:absolute; bottom:0; left:25%;right:25%;top:90%" />
+      
             </MudDrawerHeader>
             <MudNavMenu>
-                <MudPaper Elevation="1"  Class="m-3 p-2">
-                    <MudText Typo="Typo.h4">
-                        @Notes.Title
+                
+                <MudPaper Elevation="1"  Style="display:flex; justify-content:space-between;align-items:center" Class="m-3 p-2">
+                    <MudGrid Style="display:flex;justify-content:center;align-content:center;align-items:center">
+                        <MudItem xs="12" Style="">
+                    <MudText Typo="Typo.subtitle2" Style="display:flex;justify-content:center;align-items:center;margin-left:20px">
+
+                        Created at @Notes.CreatedAt.ToString("MM/dd/yyyy")
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="DeleteNote" Color="Color.Secondary" Size="Size.Medium" />
                     </MudText>
-                </MudPaper>
+                        </MudItem>
+                        <MudItem xs="9">
+                    <MudTextField T="string" @bind-Value="@TitleNote" Style="font-weight:bold;font-size:25px;" Variant="Variant.Text" TextChanged="OnEdit" Text="@Notes.Title" Adornment="Adornment.End" @onclick:stopPropagation />
+                </MudItem>
+                <MudItem xs="3">
+                       @if (Notes.Favorite == false)
+                        {
+
+                            <MudToggleIconButton ToggledChanged="TurnFav" Icon="@Icons.Material.Filled.Favorite" Color="@Color.Default" Title="Favorite" @onclick:stopPropagation />
+                        }
+                        else
+                        {
+
+                            <MudToggleIconButton ToggledChanged="NoFav" Icon="@Icons.Material.Filled.Favorite" Color="@Color.Secondary" Title="Favorite" @onclick:stopPropagation />
+
+                        }
+                       
+                </MudItem>
+                  
+                    </MudGrid>
+          
+            
+            </MudPaper>
+            <MudPaper Elevation="1" Style="display:flex; justify-content:space-between;align-items:center" Class="m-3 ">
+                <MudGrid Style="margin:10px; display:flex;justify-content:center;align-items:center">
+                    <MudItem xs="10"> <MudTextField  @bind-Value="TextValue" Label="Steps" Variant="Variant.Text" Margin="Margin.Dense"></MudTextField></MudItem>
+                    <MudItem xs="2"><MudIconButton Icon="@Icons.Material.Filled.Send" OnClick="CreateSubNote" Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Small" /></MudItem>
+              
+                    
+                    @if ( Notes.subNotes.Count()==0 || Notes.subNotes== null)
+                    {
+                        <MudAlert Severity="Severity.Info">This note dont have steps, click the icon to submit one</MudAlert>
+
+                    }else{
+                        foreach (var item in Notes.subNotes)
+                        {
+
+
+                            if(item.Status==true){
+                                <MudItem xs="2"><MudToggleIconButton Icon="@Icons.Material.Filled.RadioButtonChecked" Color="@Color.Default" Title="Favorite" @onclick:stopPropagation /></MudItem>
+                                <MudItem xs="10"> <MudTextField  @bind-Value="@item.Title" ReadOnly="true" Variant="Variant.Text" Style="text-decoration:line-through"  /> </MudItem>
+                            }
+                            else
+                            {
+                                <MudItem xs="2"><MudToggleIconButton Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="@Color.Default" Title="Favorite" @onclick:stopPropagation /></MudItem>
+                                <MudItem xs="10"> <MudTextField @bind-Value="@item.Title" ReadOnly="false" Variant="Variant.Text" /> </MudItem>
+                            }
+                            
+                        
+                    
+                    
+                    
+                    }
+                    
+                    }
+
+
+                </MudGrid>
+            </MudPaper>
+        <MudPaper Elevation="1"Style="display:flex; justify-content:space-between;align-items:center" Class="m-3 ">
+            <MudTextField T="string" @bind-Value="@_value" Label="Description" Variant="Variant.Filled" TextChanged="OnEdit" Lines="10" Text="@Notes.Description"  Adornment="Adornment.End" @onclick:stopPropagation />
+
+           
+            </MudPaper>
       @*  <MudText Typo="Typo.h4">@Notes.Status</MudText>
         <MudText>Created: @Notes.CreatedAt.ToString("MM/dd/yyyy")</MudText>
         <MudText>Last Updated: @Notes.UpdatedAt.ToString("MM/dd/yyyy")</MudText>*@
+     
+     
+            
             </MudNavMenu>
+ 
         </MudDrawer>
 
   
@@ -60,7 +188,12 @@
     
 }
 
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+@using System.Text;
 @code {
+    public bool statusNotes { get; set; }
+    
     @using ToDoList.Shared
     [Parameter]
     public Note? Notes { get; set; }
@@ -69,30 +202,132 @@
     [Parameter]
     public EventCallback OnNoteEdited { get; set; }
     bool open;
-  
+    string _value;
+    public bool Favorite{ get; set; }
+    public bool status { get; set; }
+    public Status mystatus{ get; set; }
+    string TitleNote;
+    string TextValue;
+
+    public bool getStatusbool()
+    {
+        if (mystatus== Status.Complete)
+        {
+            statusNotes = true;
+        }
+        else
+        {
+            statusNotes = false;
+        }
+        return false;
+    }
+    public void OnToggledChanged(bool toggled)
+    {
+        // Because variable is not two-way bound, we need to update it ourself
+        Favorite = toggled;
+
+
+    }
+    public void OnToggledChangedStatus(bool toggled)
+    {
+        // Because variable is not two-way bound, we need to update it ourself
+        status = toggled;
+
+
+    }
+    private async Task OnEdit(string value)
+    {
+
+
+        Notes.Description = _value;
+        Notes.Title = TitleNote;
+
+        var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                ReferenceHandler = ReferenceHandler.Preserve
+            };
+
+        var jsonContent = new StringContent(JsonSerializer.Serialize(Notes, options), Encoding.UTF8, "application/json");
+
+        await http.PutAsync($"api/note/Edit/{Notes.Id}", jsonContent);
+        await OnNoteEdited.InvokeAsync();
+    }
+    private async Task CreateSubNote()
+    {
+        SubNotes noteCreated = new SubNotes();
+        noteCreated.Title=TextValue;
+        noteCreated.Status = false;
+        noteCreated.NoteId = Notes.Id;
+       
+        await http.PostAsJsonAsync($"api/note/CreateSubNote/{Notes.Id}", TextValue);
+        await OnNoteEdited.InvokeAsync();
+        TextValue = null;
+    }
     void ToggleDrawer()
     {
         open = !open;
     }
-    private async Task Click()
-    {
-        Console.WriteLine("a");
-    }
-
+ 
     private DateTime updatedTime;
     private bool isEditing = false;
 
-    private async Task Complete(ChangeEventArgs arg)
+    private async Task Complete( bool value)
     {
-        updatedTime = DateTime.UtcNow;
-        await http.PutAsJsonAsync($"api/note/Edit/{Notes.Id}",Notes);
+        //statusNotes = toggled;
+        if (value == true)
+        {
+            Notes.Status = Status.Complete;
+        }
+        else
+        {
+            Notes.Status = Status.Pending;
+        }
+        var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve };
+        await http.PutAsJsonAsync($"api/note/Edit/{Notes.Id}", Notes, options);
+        await OnNoteEdited.InvokeAsync();
+
+    }
+    private async Task TurnFav(bool value)
+    {
+        if (value == true)
+        {
+            Notes.Favorite = true;
+        }
+        var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve };
+        await http.PutAsJsonAsync($"api/note/Edit/{Notes.Id}", Notes, options);
+        await OnNoteEdited.InvokeAsync();
+    }
+    private async Task NoFav(bool value)
+    {
+        if (value == true)
+        {
+            Notes.Favorite = false;
+        }
+        var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve };
+        await http.PutAsJsonAsync($"api/note/Edit/{Notes.Id}", Notes, options);
+        await OnNoteEdited.InvokeAsync();
+    }
+    private async Task Pending(bool value)
+    {
+        //statusNotes = toggled;
+        if (value == true)
+        {
+            Notes.Status = Status.Pending;
+        }
+        var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve };
+        await http.PutAsJsonAsync($"api/note/Edit/{Notes.Id}", Notes, options);
         await OnNoteEdited.InvokeAsync();
 
     }
     protected override void OnInitialized()
     {
+
+        getStatusbool();
         // Inicializa updatedTime con la última fecha de actualización
         updatedTime = Notes.UpdatedAt;
+        TitleNote = Notes.Title;
+        _value = Notes.Description;
         base.OnInitialized();
     }
 
@@ -103,6 +338,7 @@
 
         var resultado = await Swal.FireAsync(new SweetAlertOptions
             {
+               
                 Title = "Eliminar Tarea",
                 Text = "¿Deseas eliminar esta tarea?",
                 Icon = SweetAlertIcon.Question,
@@ -112,23 +348,13 @@
         if (resultado.IsConfirmed)
         {
             // Lógica para eliminar la nota
+
             await http.DeleteAsync($"api/note/Delete/{Notes.Id}");
             await OnNoteDeleted.InvokeAsync();
         }
     }
 
-    private async Task ToggleEditMode()
-    {
-        updatedTime = DateTime.UtcNow;
-        isEditing = true;
-    }
-
-    private async Task SaveChanges()
-    {
-        // Lógica para guardar los cambios en la nota
-
-        updatedTime = DateTime.UtcNow;
-        isEditing = false;
-    }
+  
+  
     public bool Size_CheckBox3 { get; set; } = false;
 }

@@ -4,7 +4,12 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Hello, @context.User.Identity?.Name!</a>
+        @{
+            firstLetter = context.User.Identity?.Name![0];
+        }
+        <a href="authentication/profile"> <MudAvatar Color="Color.Primary">@firstLetter</MudAvatar></a>
+    
+       
         <button class="nav-link btn btn-link" @onclick="BeginLogOut">Log out</button>
     </Authorized>
     <NotAuthorized>
@@ -18,4 +23,6 @@
     {
         Navigation.NavigateToLogout("authentication/logout");
     }
+    char? firstLetter { get; set; } 
+   
 }

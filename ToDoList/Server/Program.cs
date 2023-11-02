@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ToDoList.Server.Data;
 using ToDoList.Server.Models;
 using Microsoft.AspNetCore.Identity;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,10 @@ builder.Services.AddIdentityServer()
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 

@@ -4,8 +4,8 @@
 @inject MyDataService DataService
 
 <MudDialog OnClosed="HandleModalClosed" >
-    <DialogContent>
-        <EditForm Model="@note">
+    <DialogContent >
+        <EditForm Model="@note" >
             
         <MudTextField  Label="Title" @bind-Value="@note.Title"></MudTextField>
             <MudTextField @bind-Value="@note.Description" Lines="5" Label="Description"></MudTextField>

@@ -1,5 +1,7 @@
 ﻿@page "/"
 @using CurrieTechnologies.Razor.SweetAlert2;
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
 @using ToDoList.Shared
 @using Services
 @using Microsoft.AspNetCore.Authorization
@@ -13,62 +15,126 @@
 <PageTitle>Index</PageTitle>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 <MudGrid Style="padding:1">
     <MudItem xs="12" Style="display:flex;justify-content:center">
+        <MudTooltip Duration="1000" Text="Click here to create your notes!" Color="Color.Secondary" Placement="Placement.Top">
         <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" @onclick="OpenDialog" Size="Size.Large" />
+        </MudTooltip>
     </MudItem>  
+     <MudItem xs="12" Style="display:flex;justify-content:end">
+        <MudMenu Label="Open Menu"   Icon="@Icons.Material.Filled.Settings" Variant="Variant.Filled" Color="Color.Secondary" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.TopLeft" Dense>
+            
+            <MudMenuItem>
+                <MudMenu ActivationEvent="MouseEvent.MouseOver" AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopLeft" Dense>
+                    <ActivatorContent>
+                        <MudMenuItem Icon="@Icons.Material.Filled.ChecklistRtl" IconColor="Color.Secondary" >Status</MudMenuItem>
+                    </ActivatorContent>
+
+                    <ChildContent>
+                        <MudMenuItem OnClick="FilterByStatusComplete"> Completed </MudMenuItem>
+                        <MudMenuItem OnClick="FilterByStatusPending"> Pending </MudMenuItem>
+                        <MudMenuItem OnClick="FilterByStatusAll"> All </MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
+            </MudMenuItem>
+            <MudMenuItem Icon="@Icons.Material.Filled.Favorite" OnClick="FilterByImportance" IconColor="Color.Secondary">Favorite</MudMenuItem>
+            @*<MudMenuItem>
+            <MudMenu ActivationEvent="MouseEvent.MouseOver" AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopLeft" Dense>
+            <ActivatorContent>
+            <MudMenuItem>Item 2</MudMenuItem>
+            </ActivatorContent>
+
+            <ChildContent>
+            <MudMenuItem> Item 2.1 </MudMenuItem>
+            <MudMenuItem> Item 2.2 </MudMenuItem>
+            </ChildContent>
+            </MudMenu>
+            </MudMenuItem>*@
+        </MudMenu>
+
+    </MudItem>
+   
+
 </MudGrid>
+
+
 
 <div class="container">
     
     
     @if (notes != null)
     {
-                <MudGrid >
-            @foreach (var note in notes)
+        <MudGrid >
+            @foreach (var note in notes.Where(x => (showAllStatus || x.Status == filterStatus) && (!favorite || x.Favorite)))
             {
-                    <MudItem xs="12">
-                       
-                        <NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" OnNoteEdited="HandleNoteEdited" />
-                   
-                    </MudItem>
-            }
-                </MudGrid>
+              
+                <MudItem xs="12" >
+                    <NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" OnNoteEdited="HandleNoteEdited" />  
+                </MudItem>
 
-                @*<NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" />*@
-            
-        
+            }
+        </MudGrid>
+
+        @*<NoteDetail Notes="note" OnNoteDeleted="HandleNoteDeleted" />*@
     }
     else
     {
-        
-       
+        <MudGrid>
+            <MudItem xs="12">
+                <MudAlert Class="m-4" Severity="Severity.Info">You dont have Notes yet</MudAlert>
+            </MudItem>
+        </MudGrid>
+        @if (notes?.Count() == 1 )
+        {
+            <H1>asdasd</H1>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudAlert Class="m-4" Severity="Severity.Info">You dont have Notes yet</MudAlert>
+                </MudItem>
+            </MudGrid>
+        }
     }
 </div>
 
-@if(notes== null)
-{
-    <MudAlert Severity="Severity.Info">You dont have Notes yet</MudAlert>
-    <SurveyPrompt Title="How is Blazor working for you?" />
-}
+
+@*<MudExpansionPanels Style="margin-top:40px">
+    <MudExpansionPanel Text="Completed Notes" MaxHeight="1000" IsExpandedChanged="ExpandedChanged">
 
 
+    </MudExpansionPanel>
+</MudExpansionPanels>
+*@
+<MudScrollToTop Style="position:absolute;right:50%;right:50%;bottom:-2.8rem">
+    <MudFab Color="Color.Tertiary" Icon="@Icons.Material.Filled.ArrowCircleUp" />
+</MudScrollToTop>
 @code{
-    List<Note> ?notes;
-    public Note NotesModel=new Note();
-    
+    List<Note>? notes;
+    public Note NotesModel = new Note();
+    private Status filterStatus {get;set;}
+    private bool showAllStatus = true;
+    private bool favorite = false;
+    private void FilterByStatusComplete( )
+    {   showAllStatus = false;
+        filterStatus = Status.Complete;  
+        StateHasChanged();
+    }
+    private void FilterByStatusPending( )
+    {
+        showAllStatus = false;
+        filterStatus = Status.Pending;    
+        StateHasChanged();
+    }
+    private void FilterByStatusAll()
+    {
+        showAllStatus = true;
+        StateHasChanged();
+
+
+    }
+    private void FilterByImportance()
+    {
+        favorite = !favorite;
+    }
     private async void HandleNoteEdited()
     {
         await RefreshNotes(); // Actualiza la lista de notas inmediatamente después de editar
@@ -90,13 +156,27 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        notes = await http.GetFromJsonAsync<List<Note>>("api/note");
+        var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                ReferenceHandler = ReferenceHandler.Preserve
+            };
+
+        notes = await http.GetFromJsonAsync<List<Note>>("api/note", jsonSerializerOptions);
+      
         DataService.NoteCreated += HandleNoteCreated;
 
     }
     private async Task RefreshNotes()
     {
-        notes = await http.GetFromJsonAsync<List<Note>>("api/note");
+        var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                ReferenceHandler = ReferenceHandler.Preserve
+            };
+
+        notes = await http.GetFromJsonAsync<List<Note>>("api/note", jsonSerializerOptions);
+
     }
 
     private  void OpenDialog()
@@ -104,8 +184,9 @@
 
         DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true };
 
-        var dialog=DialogService.Show<CreateNote>("New Note", closeOnEscapeKey);
+        var dialog = DialogService.Show<CreateNote>("New Note", new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true });
         var result = dialog.Result;
+        
         if (!result.IsCanceled)
         {        
             StateHasChanged();
@@ -116,7 +197,35 @@
 
 
     }
+    private RenderFragment _panelContent;
 
+    private async Task ExpandedChanged(bool newVal)
+    {
+        if (newVal)
+        {
+            await Task.Delay(600);
+            _panelContent = _bigAsyncContent;
+        }
+        else
+        {
+            // Reset after a while to prevent sudden collapse.
+            Task.Delay(350).ContinueWith(t => _panelContent = null).AndForget();
+        }
+    }
+
+    private RenderFragment _bigAsyncContent = __builder =>
+    {
+        
+
+
+
+        <div>The expansion of the</div>
+        <div>inner panel is done after</div>
+        <div>IsExpandedChanged</div>
+        <div>has completed to allow for</div>
+        <div>smooth opening of async data</div>
+        <div>of initially unknown height.</div>
+    };
    
 
 }

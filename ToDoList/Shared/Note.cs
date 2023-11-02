@@ -21,8 +21,9 @@ namespace ToDoList.Shared
         public DateTime CreatedAt { get; set; }=DateTime.Now;
         public DateTime UpdatedAt { get; set; }= DateTime.Now;
         public Status Status { get; set; }
-       
-       
+       public bool Favorite { get; set; }
+
+        public virtual ICollection<SubNotes> subNotes { get; set; } = new List<SubNotes>();
         public virtual ICollection<Tags> Tags { get; set; }=new List<Tags>();
 
     }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToDoList.Server.Data;
 
@@ -11,9 +12,11 @@ using ToDoList.Server.Data;
 namespace ToDoList.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231019233854_newCampFavorite")]
+    partial class newCampFavorite
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -405,31 +408,6 @@ namespace ToDoList.Server.Data.Migrations
                     b.ToTable("Notes");
                 });
 
-            modelBuilder.Entity("ToDoList.Shared.SubNotes", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("NoteId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("NoteId");
-
-                    b.ToTable("SubNotes");
-                });
-
             modelBuilder.Entity("ToDoList.Shared.Tags", b =>
                 {
                     b.Property<int>("Id")
@@ -510,17 +488,6 @@ namespace ToDoList.Server.Data.Migrations
                         .HasForeignKey("ApplicationUserId");
                 });
 
-            modelBuilder.Entity("ToDoList.Shared.SubNotes", b =>
-                {
-                    b.HasOne("ToDoList.Shared.Note", "Note")
-                        .WithMany("subNotes")
-                        .HasForeignKey("NoteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Note");
-                });
-
             modelBuilder.Entity("ToDoList.Shared.Tags", b =>
                 {
                     b.HasOne("ToDoList.Shared.Note", null)
@@ -536,8 +503,6 @@ namespace ToDoList.Server.Data.Migrations
             modelBuilder.Entity("ToDoList.Shared.Note", b =>
                 {
                     b.Navigation("Tags");
-
-                    b.Navigation("subNotes");
                 });
 #pragma warning restore 612, 618
         }

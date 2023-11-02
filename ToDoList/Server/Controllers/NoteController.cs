@@ -22,13 +22,21 @@ namespace ToDoList.Server.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
         public async Task<ActionResult<List<Note>>> GetNotes()
         {
-            var result= await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var result = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (result == null)
                 return NotFound();
-            return Ok(result.Notes);
+
+            var userNotes = result.Notes;
+
+            foreach (var note in userNotes)
+            {
+                // Carga explícita de las SubNotes para cada Note.
+                context.Entry(note).Collection(n => n.subNotes).Load();
+            }
+
+            return Ok(userNotes);
         }
         [HttpPost]
         public async Task<ActionResult<List<Note>>> PostNote(Note note)
@@ -67,9 +75,19 @@ namespace ToDoList.Server.Controllers
             {
                 return NotFound("Note not found");
             }
+
+            // Obtiene las SubNotes de la base de datos.
+            var subNotesToDelete = context.SubNotes.Where(sn => sn.NoteId == noteToDelete.Id);
+            noteToDelete.subNotes.Clear();
             context.Notes.Remove(noteToDelete);
             await context.SaveChangesAsync();
-            //var updateResult = await _userManager.UpdateAsync(result);
+
+            // Verifica si todas las SubNotes se eliminaron correctamente.
+            var subNotesCount = await context.SubNotes.CountAsync(sn => sn.ID == id);
+            if (subNotesCount == 0)
+            {
+                await Console.Out.WriteLineAsync("hi");
+            }
 
             return NoContent();
         }
@@ -87,10 +105,32 @@ namespace ToDoList.Server.Controllers
             return Ok();
           
         }
+        [HttpPost]
+        [Route("CreateSubNote/{id}")]
+        public async Task<ActionResult<List<Note>>> CreateSubNote(int id, [FromBody]  string description )       
+        {
+            SubNotes subnote=new SubNotes();
+            var result = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (result == null)
+                return NotFound();
+            var subnoteToCreate = result.Notes.FirstOrDefault(n => n.Id == id);
+            subnote.Title = description;
+            subnote.Status = false;
+            subnoteToCreate.subNotes.Add(subnote);
+            if (subnoteToCreate==null)
+            {
+                return NotFound("Note not found");
+            }
+            //subnoteToCreate.subNotes.Add(notes);
+            await context.SaveChangesAsync();
 
+            return Ok();
+
+        }
+        
         [HttpPut]
         [Route("Edit/{id}")]
-        public async Task<ActionResult<Note>> EditNote(int id, Note updatedNote)
+        public async Task<ActionResult<Note>> EditNote(int id, [FromBody] Note updatedNote)
         {
             var user = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
@@ -105,15 +145,20 @@ namespace ToDoList.Server.Controllers
             {
                 return NotFound("Note not found");
             }
-            if (noteToEdit.Status == Status.Complete)
-            {
-                noteToEdit.Status = Status.Pending;
-            }
-            else
-            {
-                noteToEdit.Status = Status.Complete;
-            }
-
+            //if (noteToEdit.Status == Status.Complete)
+            //{
+            //    noteToEdit.Status = Status.Pending;
+            //}
+            //else
+            //{
+            //    noteToEdit.Status = Status.Complete;
+            //}
+            
+            noteToEdit.Description = updatedNote.Description;
+            noteToEdit.Status=updatedNote.Status;
+            noteToEdit.Favorite=updatedNote.Favorite;
+            noteToEdit.Title = updatedNote.Title;
+            noteToEdit.UpdatedAt = DateTime.Now;
             context.Update(noteToEdit);
             // Guarda los cambios en la base de datos
             await context.SaveChangesAsync();
