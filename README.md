@@ -10,5 +10,8 @@ SubNotes section
 Subnotes Creation
 ![image](https://github.com/LewanX/ToDoList-Blazor/assets/85626827/436fe130-d687-44f7-b27d-bc5d16403ce9)
 
+Filter Option
+![image](https://github.com/LewanX/ToDoList-Blazor/assets/85626827/ae428548-0942-4f44-8f5a-979a96a52ab1)
+
 
 
