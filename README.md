@@ -13,5 +13,7 @@ Subnotes Creation
 Filter Option
 ![image](https://github.com/LewanX/ToDoList-Blazor/assets/85626827/ae428548-0942-4f44-8f5a-979a96a52ab1)
 
+Realtime edition of title or description
+![image](https://github.com/LewanX/ToDoList-Blazor/assets/85626827/dc6b61b2-259f-4c6a-b4a7-152dde8a5f99)
 
 
