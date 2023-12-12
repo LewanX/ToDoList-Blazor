@@ -7,4 +7,8 @@ Main View
 SubNotes section
 ![image](https://github.com/LewanX/ToDoList-Blazor/assets/85626827/09046bde-43dc-45eb-a450-786ff33e6007)
 
+Subnotes Creation
+![image](https://github.com/LewanX/ToDoList-Blazor/assets/85626827/436fe130-d687-44f7-b27d-bc5d16403ce9)
+
+
 
